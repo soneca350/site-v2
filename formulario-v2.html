@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        #meuFormulario {
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px #bbb;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            display: inline-block;
+            height: 40px;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="meuFormulario">
+            <label for="numeroCaixa">Número da Caixa:</label>
+            <input type="text" id="numeroCaixa" name="Número da Caixa">
+
+            <label for="interfaceConexao">Interface de conexão:</label>
+            <input type="text" id="interfaceConexao" name="Interface de conexão">
+
+            <label for="status">Status:</label>
+            <input type="text" id="status" name="Status">
+
+            <label for="endereco">Endereço:</label>
+            <input type="text" id="endereco" name="Endereço">
+
+            <label for="solicitante">Solicitante:</label>
+            <input type="text" id="solicitante" name="Solicitante">
+
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="Descrição">
+
+            <label for="protocolo">Protocolo:</label>
+            <input type="text" id="protocolo" name="Protocolo">
+
+            <button type="button" onclick="gerarResultado()">Gerar</button>
+            <button type="button" onclick="copiarResultado()">Copiar</button>
+            <button type="button" onclick="salvarModelo()">Salvar Modelo</button>
+            <button type="button" onclick="removerModelo()">Remover Modelo</button>
+            <select id="modelosSalvos" onchange="carregarModelo()">
+                <option value="">Selecione um modelo</option>
+            </select>
+        </form>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', carregarModelos);
+
+        function gerarResultado() {
+            var formulario = document.getElementById('meuFormulario');
+            var resultado = '';
+            for (var i = 0; i < formulario.length; i++) {
+                if (formulario[i].type === 'text') {
+                    if (formulario[i].name === 'Protocolo') {
+                        resultado += formulario[i].name + ': *' + formulario[i].value + '*<br>';
+                    } else {
+                        resultado += formulario[i].name + ': ' + formulario[i].value + '<br>';
+                    }
+                }
+            }
+            document.getElementById('resultado').innerHTML = resultado;
+        }
+
+        function copiarResultado() {
+            var range = document.createRange();
+            range.selectNode(document.getElementById('resultado'));
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            alert('Resultado copiado!');
+        }
+
+        function salvarModelo() {
+            var formulario = document.getElementById('meuFormulario');
+            var modelo = {};
+            for (var i = 0; i < formulario.length; i++) {
+                if (formulario[i].type === 'text') {
+                    modelo[formulario[i].name] = formulario[i].value;
+                }
+            }
+            var nomeModelo = prompt("Digite o nome do modelo:");
+            if (nomeModelo) {
+                localStorage.setItem(nomeModelo, JSON.stringify(modelo));
+                carregarModelos();
+            }
+        }
+
+        function carregarModelos() {
+            var select = document.getElementById('modelosSalvos');
+            select.innerHTML = '<option value="">Selecione um modelo</option>';
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (key !== 'undefined') {
+                    var option = document.createElement('option');
+                    option.value = key;
+                    option.text = key;
+                    select.add(option);
+                }
+            }
+        }
+
+        function carregarModelo() {
+            var select = document.getElementById('modelosSalvos');
+            var modelo = JSON.parse(localStorage.getItem(select.value));
+            var formulario = document.getElementById('meuFormulario');
+            for (var i = 0; i < formulario.length; i++) {
+                if (formulario[i].type === 'text') {
+                    formulario[i].value = modelo[formulario[i].name];
+                }
+            }
+        }
+
+        function removerModelo() {
+            var select = document.getElementById('modelosSalvos');
+            var modeloSelecionado = select.value;
+            if (modeloSelecionado) {
+                localStorage.removeItem(modeloSelecionado);
+                carregarModelos();
+                alert('Modelo removido com sucesso!');
+            } else {
+                alert('Selecione um modelo para remover.');
+            }
+        }
+    </script>
+</body>
+</html>
